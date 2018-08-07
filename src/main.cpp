@@ -1,7 +1,7 @@
 #include <QtCore/QCoreApplication>
-#include "glovemanager.h"
-#include "calculator.h"
-#include "rosbridge.h"
+#include <thu_data_glove/glovemanager.h>
+#include <thu_data_glove/calculator.h>
+#include <thu_data_glove/rosbridge.h>
 #include <QtCore/QThread>
 
 

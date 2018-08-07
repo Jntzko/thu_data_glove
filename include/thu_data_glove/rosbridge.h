@@ -2,7 +2,7 @@
 #define ROSBRIDGE_H
 
 #include <QtCore/QThread>
-#include "datastruct.h"
+#include <thu_data_glove/datastruct.h>
 #include <ros/ros.h>
 
 class rosBridge : public QThread

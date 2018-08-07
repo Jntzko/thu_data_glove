@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(glove)
+project(thu_data_glove)
 
 add_compile_options(-std=c++11)
 
@@ -41,11 +41,11 @@ set(${PROJECT_NAME}_SRCS
   src/calculator.cpp
 )
 set(${PROJECT_NAME}_HEADERS
-  src/calculator.h
-  src/datastruct.h
-  src/glovemanager.h
-  src/protocol.h
-  src/rosbridge.h
+  include/${PROJECT_NAME}/calculator.h
+  include/${PROJECT_NAME}/datastruct.h
+  include/${PROJECT_NAME}/glovemanager.h
+  include/${PROJECT_NAME}/protocol.h
+  include/${PROJECT_NAME}/rosbridge.h
 )
 qt5_wrap_cpp(${PROJECT_NAME}_MOCS ${${PROJECT_NAME}_HEADERS})
 

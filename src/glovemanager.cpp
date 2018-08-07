@@ -1,4 +1,4 @@
-#include "glovemanager.h"
+#include <thu_data_glove/glovemanager.h>
 #include <QtNetwork/QNetworkDatagram>
 #include <QtCore/QThread>
 #include <QtNetwork/QNetworkInterface>

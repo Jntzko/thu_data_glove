@@ -2,7 +2,7 @@
 #define CALCULATOR_H
 
 #include <QtCore/QObject>
-#include "datastruct.h"
+#include <thu_data_glove/datastruct.h>
 #include <QtCore/QMap>
 
 

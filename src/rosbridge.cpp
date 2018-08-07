@@ -1,6 +1,6 @@
-#include "rosbridge.h"
-#include <glove/SensorData.h>
-#include <glove/GloveData.h>
+#include <thu_data_glove/rosbridge.h>
+#include <thu_data_glove/SensorData.h>
+#include <thu_data_glove/GloveData.h>
 #include <signal.h>
 #include <QtCore/QDebug>
 #include <QtCore/QCoreApplication>
@@ -27,14 +27,14 @@ void rosBridge::run()
 {
 	ros::NodeHandle _nh;
 	signal(SIGINT, ros_quit);
-	this->_sensor_data_pub = _nh.advertise<glove::SensorData>("sensor_raw", 2);
-	this->_glove_data_pub = _nh.advertise<glove::GloveData>("glove_joint", 2);
+	this->_sensor_data_pub = _nh.advertise<thu_data_glove::SensorData>("sensor_raw", 2);
+	this->_glove_data_pub = _nh.advertise<thu_data_glove::GloveData>("glove_joint", 2);
 	ros::spin();
 }
 
 void rosBridge::sensorData_received(SensorData sd)
 {
-	glove::SensorData data;
+	thu_data_glove::SensorData data;
 	data.gloveID = sd.gloveID;
 	data.timestemp = sd.timestemp;
 	for (int i = 0 ; i < 18 ; i++){
@@ -60,7 +60,7 @@ void rosBridge::sensorData_received(SensorData sd)
 
 void rosBridge::gloveData_received(GloveData gd)
 {
-	glove::GloveData data;
+	thu_data_glove::GloveData data;
 	data.gloveID = gd.gloveID;
 	data.arm0 = gd.arm.a0;
 	data.arm1_0 = gd.arm.a10;

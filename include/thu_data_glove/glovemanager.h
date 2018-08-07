@@ -3,10 +3,10 @@
 
 #include <QtCore/QObject>
 #include <QtNetwork/QUdpSocket>
-#include "protocol.h"
+#include <thu_data_glove/protocol.h>
 #include <QtCore/QList>
 #include <QtCore/QPair>
-#include "datastruct.h"
+#include <thu_data_glove/datastruct.h>
 
 class GloveManager : public QObject
 {

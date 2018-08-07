@@ -1,4 +1,4 @@
-#include "protocol.h"
+#include <thu_data_glove/protocol.h>
 
 QByteArray pack(const uint8_t *data, size_t len)
 {

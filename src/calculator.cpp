@@ -1,4 +1,4 @@
-#include "calculator.h"
+#include <thu_data_glove/calculator.h>
 #include <QtGui/QQuaternion>
 
 
