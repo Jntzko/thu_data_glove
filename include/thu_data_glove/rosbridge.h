@@ -10,7 +10,9 @@ class rosBridge : public QThread
 	Q_OBJECT
 
 private:
-	ros::Publisher _sensor_data_pub;
+  std::vector<ros::Publisher> imu_pub_;
+  std::vector<ros::Publisher> mag_pub_;
+  //soon deprecated
 	ros::Publisher _glove_data_pub;
 
 public:

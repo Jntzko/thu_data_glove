@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   geometry_msgs
+  sensor_msgs
 )
 
 find_package(Qt5 REQUIRED COMPONENTS Core Network Gui Widgets)
