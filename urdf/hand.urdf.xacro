@@ -2,42 +2,12 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"
   name="data_glove">
 
-  <xacro:macro name="floating_joint" params="child parent">
-    <link name="${child}"/>
-    <joint name="${child}_joint" type="floating">
-      <parent link="${parent}"/>
-      <child link="${child}"/>
-    </joint>
-  </xacro:macro>
-
-  <link name="world"/>
-<!--
-  <xacro:floating_joint child="lf_knuckle_imu" parent="world"/>
-  <xacro:floating_joint child="lf_middle_imu" parent="world"/>
-  <xacro:floating_joint child="lf_distal_imu" parent="world"/>
-  <xacro:floating_joint child="rf_knuckle_imu" parent="world"/>
-  <xacro:floating_joint child="rf_middle_imu" parent="world"/>
-  <xacro:floating_joint child="rf_distal_imu" parent="world"/>
-  <xacro:floating_joint child="mf_knuckle_imu" parent="world"/>
-  <xacro:floating_joint child="mf_middle_imu" parent="world"/>
-  <xacro:floating_joint child="mf_distal_imu" parent="world"/>
-  <xacro:floating_joint child="ff_knuckle_imu" parent="world"/>
-  <xacro:floating_joint child="ff_middle_imu" parent="world"/>
-  <xacro:floating_joint child="ff_distal_imu" parent="world"/>
-  <xacro:floating_joint child="th_knuckle_imu" parent="world"/>
-  <xacro:floating_joint child="th_middle_imu" parent="world"/>
-  <xacro:floating_joint child="th_distal_imu" parent="world"/>
-  <xacro:floating_joint child="palm_imu" parent="world"/>
-  <xacro:floating_joint child="arm_imu" parent="world"/>
-  <xacro:floating_joint child="wrist_imu" parent="world"/>
--->
-
-  <xacro:macro name="finger" params="prefix parent origin l_knuckle l_middle l_distal">
+  <xacro:macro name="knuckle" params="prefix parent origin rpy" >
     <link name="${prefix}_knuckle">
       <visual>
-        <origin xyz="${l_knuckle/2} 0.0 0.0" rpy="0 -1.57 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <cylinder length="${l_knuckle}" radius="0.01"/>
+          <sphere radius="0.01"/>
         </geometry>
         <material name="gray">
           <color rgba="0.5 0.5 0.5 1.0"/>
@@ -45,58 +15,56 @@
       </visual>
     </link>
 
-    <link name="${prefix}_middle">
-      <visual>
-        <origin xyz="${l_middle/2} 0.0 0.0" rpy="0 -1.57 0"/>
-        <geometry>
-          <cylinder length="${l_middle}" radius="0.01"/>
-        </geometry>
-        <material name="gray">
-          <color rgba="0.5 0.5 0.5 1.0"/>
-        </material>
-      </visual>
-    </link>
-
-    <link name="${prefix}_distal">
-      <visual>
-        <origin xyz="${l_distal/2} 0.0 0.0" rpy="0 -1.57 0"/>
-        <geometry>
-          <cylinder length="${l_distal}" radius="0.01"/>
-        </geometry>
-        <material name="gray">
-          <color rgba="0.5 0.5 0.5 1.0"/>
-        </material>
-      </visual>
-    </link>
-
-    <joint name="${prefix}_j3" type="revolute">
+    <joint name="${prefix}_j4" type="revolute">
       <parent link="${parent}"/>
       <child link="${prefix}_knuckle" />
-      <origin xyz="${origin}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-      <limit upper="1.57079" lower="0" effort="1000.0" velocity="0.5"/>
+      <origin xyz="${origin}" rpy="${rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit upper="0.22" lower="-0.22" effort="1000.0" velocity="0.5"/>
     </joint>
-  
-    <joint name="${prefix}_j2" type="revolute">
-      <parent link="${prefix}_knuckle"/>
-      <child link="${prefix}_middle" />
-      <origin xyz="${l_knuckle} 0 0" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-      <limit upper="1.57079" lower="0" effort="1000.0" velocity="0.5"/>
-    </joint>
-  
-    <joint name="${prefix}_j1" type="revolute">
-      <parent link="${prefix}_middle"/>
-      <child link="${prefix}_distal" />
-      <origin xyz="${l_middle} 0 0" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-      <limit upper="1.57079" lower="0" effort="1000.0" velocity="0.5"/>
-    </joint>
- 
+
   </xacro:macro>
 
-  
+  <xacro:macro name="phalanx" params="prefix name length joint parent origin rpy" >
+    <link name="${prefix}_${name}">
+      <visual>
+        <origin xyz="${length/2} 0 0" rpy="0 -1.57 0"/>
+        <geometry>
+          <cylinder length="${length}" radius="0.01"/>
+        </geometry>
+        <material name="gray">
+          <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+      </visual>
+      <visual>
+        <origin xyz="${length} 0 0" rpy="0 0 0"/>
+        <geometry>
+          <sphere radius="0.01"/>
+        </geometry>
+        <material name="gray">
+          <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="${prefix}_${joint}" type="revolute">
+      <parent link="${parent}"/>
+      <child link="${prefix}_${name}" />
+      <origin xyz="${origin}" rpy="${rpy}"/>
+      <axis xyz="0 0 1"/>
+      <limit upper="1.57079" lower="0" effort="1000.0" velocity="0.5"/>
+    </joint>
+
+  </xacro:macro>
+
+
+
+  <!-- World -->
+  <link name="world"/>
+
+  <!-- Wrist -->
   <link name="wrist"/>
+
 <!--
   <joint name="world_wrist" type="floating">
     <parent link="world"/>
@@ -106,9 +74,10 @@
   <joint name="world_wrist" type="fixed">
     <parent link="world"/>
     <child link="wrist" />
-    <origin xyz="0.0 0 0" rpy="0 0 0"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
   </joint>
 
+  <!-- Palm --> 
   <link name="palm">
     <visual>
       <geometry>
@@ -121,14 +90,110 @@
     </visual>
   </link>
 
-  <xacro:finger prefix="ff" parent="palm" origin="0.055 0.04 0" l_knuckle="0.06" l_middle="0.04" l_distal="0.03"/>
-  <xacro:finger prefix="mf" parent="palm" origin="0.055 0.015 0" l_knuckle="0.065" l_middle="0.045" l_distal="0.03"/>
-  <xacro:finger prefix="rf" parent="palm" origin="0.055 -0.01 0" l_knuckle="0.06" l_middle="0.04" l_distal="0.03"/>
-  <xacro:finger prefix="lf" parent="palm" origin="0.055 -0.035 0" l_knuckle="0.05" l_middle="0.03" l_distal="0.03"/>
-
   <joint name="wrist_palm" type="fixed">
     <parent link="wrist"/>
     <child link="palm"/>
     <origin xyz="0.055 0 0" rpy="0 0 0"/>
   </joint>
+
+  <!-- first finger -->
+  <xacro:knuckle prefix="ff"
+      parent="palm"
+      origin="0.055 0.04 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="ff" name="proximal"
+      parent="ff_knuckle"
+      joint="j3"
+      length="0.06"
+      origin="0 0 0" rpy="-1.57079 0 0"/>
+  <xacro:phalanx prefix="ff" name="middle"
+      parent="ff_proximal"
+      joint="j2"
+      length="0.04"
+      origin="0.06 0 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="ff" name="distal"
+      parent="ff_middle"
+      joint="j1"
+      length="0.03"
+      origin="0.04 0 0" rpy="0 0 0"/>
+
+  <!-- middle finger -->
+  <xacro:knuckle prefix="mf"
+      parent="palm"
+      origin="0.055 0.015 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="mf" name="proximal"
+      parent="mf_knuckle"
+      joint="j3"
+      length="0.065"
+      origin="0 0 0" rpy="-1.57079 0 0"/>
+  <xacro:phalanx prefix="mf" name="middle"
+      parent="mf_proximal"
+      joint="j2"
+      length="0.045"
+      origin="0.065 0 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="mf" name="distal"
+      parent="mf_middle"
+      joint="j1"
+      length="0.03"
+      origin="0.045 0 0" rpy="0 0 0"/>
+
+  <!-- ring finger -->
+  <xacro:knuckle prefix="rf"
+      parent="palm"
+      origin="0.055 -0.01 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="rf" name="proximal"
+      parent="rf_knuckle"
+      joint="j3"
+      length="0.06"
+      origin="0 0 0" rpy="-1.57079 0 0"/>
+  <xacro:phalanx prefix="rf" name="middle"
+      parent="rf_proximal"
+      joint="j2"
+      length="0.04"
+      origin="0.06 0 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="rf" name="distal"
+      parent="rf_middle"
+      joint="j1"
+      length="0.03"
+      origin="0.04 0 0" rpy="0 0 0"/>
+
+  <!-- little finger -->
+  <xacro:knuckle prefix="lf"
+      parent="palm"
+      origin="0.055 -0.035 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="lf" name="proximal"
+      parent="lf_knuckle"
+      joint="j3"
+      length="0.05"
+      origin="0 0 0" rpy="-1.57079 0 0"/>
+  <xacro:phalanx prefix="lf" name="middle"
+      parent="lf_proximal"
+      joint="j2"
+      length="0.03"
+      origin="0.05 0 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="lf" name="distal"
+      parent="lf_middle"
+      joint="j1"
+      length="0.03"
+      origin="0.03 0 0" rpy="0 0 0"/>
+
+  <!-- thumb -->
+  <xacro:knuckle prefix="th"
+      parent="palm"
+      origin="-0.02 0.05 0" rpy="-0.5 0 0.8"/>
+  <xacro:phalanx prefix="th" name="proximal"
+      parent="th_knuckle"
+      joint="j3"
+      length="0.06"
+      origin="0 0 0" rpy="-1.57079 0 0"/>
+  <xacro:phalanx prefix="th" name="middle"
+      parent="th_proximal"
+      joint="j2"
+      length="0.05"
+      origin="0.06 0 0" rpy="0 0 0"/>
+  <xacro:phalanx prefix="th" name="distal"
+      parent="th_middle"
+      joint="j1"
+      length="0.05"
+      origin="0.03 0 0" rpy="0 0 0"/>
+
 </robot>
