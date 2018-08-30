@@ -12,11 +12,7 @@ class rosBridge : public QThread
 
 private:
   ros::Publisher pub_;
-  //soon deprecated
-	ros::Publisher _glove_data_pub;
   bool bias_ = false;
-  std::vector<tf::Quaternion> bias_values_;
-  std::vector<tf::Quaternion> prev_values_;
 
 public:
 	explicit rosBridge(int argc, char **argv, QObject *parent = nullptr);
@@ -27,7 +23,6 @@ private:
 
 public slots:
 	void sensorData_received(SensorData sd);
-	void gloveData_received(GloveData gd);
 
 signals:
 	void open();

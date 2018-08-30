@@ -2,18 +2,16 @@
 <launch>
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find thu_data_glove)/urdf/hand.urdf.xacro" />
 
-<!--
   <node pkg="thu_data_glove" type="thu_data_glove" name="thu_data_glove" output="screen" />
--->
-  <node pkg="thu_data_glove" type="imu_tf" name="imu_tf" output="screen" />
-  <node pkg="thu_data_glove" type="kinematic_filter" name="kinematic_filter" output="screen" />
-  <node pkg="thu_data_glove" type="state_publisher" name="state_publisher" output="screen" />
 
-<!--
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
-    <param name="use_gui" value="true"/>
-  </node>
--->
+  <!-- publish transforms for imus (only translation) -->
+  <node pkg="thu_data_glove" type="imu_tf" name="imu_tf" output="screen" />
+
+  <!-- Apply some filter to the raw sensor data -->
+  <node pkg="thu_data_glove" type="kinematic_filter" name="kinematic_filter" output="screen" />
+
+  <!-- publish joint states calculated by the imus-->
+  <node pkg="thu_data_glove" type="state_publisher" name="state_publisher" output="screen" />
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 

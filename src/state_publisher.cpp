@@ -8,7 +8,6 @@
 #define Z_AXIS tf::Vector3(0,0,1)
 
 ros::Publisher pub;
-ros::Publisher tmp_pub;
 
 bool init = false;
 double alpha = 0.1;
@@ -27,16 +26,6 @@ double getAngle(sensor_msgs::Imu imu1, sensor_msgs::Imu imu2, tf::Vector3 plane_
 
   q2 = tf::inverse(q1)*q2;
   q1 =tf::Quaternion(0,0,0,1);
-
-/*
-  sensor_msgs::Imu tmp;
-  tmp.header.stamp = ros::Time::now();
-  tmp.header.frame_id = "world";
-  tf::quaternionTFToMsg(q1, tmp.orientation);
-  tmp_pub.publish(tmp);
-*/
-
-
 
   tf::Vector3 q1_v = tf::quatRotate(q1, tf::Vector3(1,0,0)); // x axis of parent
   tf::Vector3 q2_v = tf::quatRotate(q2, tf::Vector3(1,0,0)); // x axis of child
@@ -112,8 +101,6 @@ int main(int argc, char *argv[]) {
   ros::Subscriber sub_wrist = nh.subscribe("/imu/data", 10, callback);
 
   pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1);
-
-tmp_pub = nh.advertise<sensor_msgs::Imu>("test_Q", 1);
 
   ros::spin();
 

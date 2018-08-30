@@ -42,8 +42,6 @@ void rosBridge::run()
 
 	this->pub_ = _nh.advertise<thu_data_glove::ImuArray>("/imu/data_raw", 2);
 
-  this->bias_values_.resize(18);
-  this->prev_values_.resize(18);
 	ros::spin();
 }
 
@@ -53,11 +51,12 @@ void rosBridge::sensorData_received(SensorData sd)
     ROS_ERROR_STREAM("Unknown glove ID: " << sd.gloveID);
     return;
   }
-  // TODO rosparam
+  // TODO use rosparam
   if (sd.gloveID != NEW_LH)
     return;
 
-  ros::Time time = ros::Time::now(); //todo
+  // TODO use time from sd message
+  ros::Time time = ros::Time::now();
 
   thu_data_glove::ImuArray imus;
   imus.header.stamp = ros::Time::now();
@@ -123,9 +122,4 @@ void rosBridge::sensorData_received(SensorData sd)
   }
   bias_ = true;
   this->pub_.publish(imus);
-}
-
-// soon deprecated
-void rosBridge::gloveData_received(GloveData gd)
-{
 }

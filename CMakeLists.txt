@@ -70,10 +70,6 @@ target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
 
-add_executable(viz src/viz.cpp)
-add_dependencies(viz ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
-target_link_libraries(viz ${catkin_LIBRARIES})
-
 add_executable(kinematic_filter src/kinematic_filter.cpp)
 add_dependencies(kinematic_filter ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 target_link_libraries(kinematic_filter ${catkin_LIBRARIES})
