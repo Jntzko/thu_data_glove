@@ -1,19 +1,21 @@
 #include <thu_data_glove/rosbridge.h>
 #include <thu_data_glove/SensorData.h>
 #include <thu_data_glove/GloveData.h>
+#include <thu_data_glove/ImuArray.h>
 #include <signal.h>
 #include <QtCore/QDebug>
 #include <QtCore/QCoreApplication>
 
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
+#include <tf/tf.h>
 
 #define NEW_LH 1192974848
 #define NEW_RH 1193564786
 #define OLD_LH 1192778367
 #define OLD_RH 1192974877
 
-static std::vector<std::string> frames{ "lf_distal", "lf_middle", "lf_knuckle", "rf_distal", "rf_middle", "rf_knuckle", "mf_distal", "mf_middle", "mf_knuckle", "ff_distal", "ff_middle", "ff_knuckle", "th_distal", "th_middle", "th_knuckle", "palm", "arm", "wrist"};
+static std::vector<std::string> frames{ "lf_distal", "lf_middle", "lf_proximal", "rf_distal", "rf_middle", "rf_proximal", "mf_distal", "mf_middle", "mf_proximal", "ff_distal", "ff_middle", "ff_proximal", "th_distal", "th_middle", "th_proximal", "wrist", "arm", "palm"};
 
 void ros_quit(int)
 {
@@ -38,13 +40,10 @@ void rosBridge::run()
 	ros::NodeHandle _nh;
 	signal(SIGINT, ros_quit);
 
-  for (int i=0; i<18; i++) {
-	  this->imu_pub_.push_back(_nh.advertise<sensor_msgs::Imu>(frames[i] + "/imu/data_raw", 2));
-	  this->mag_pub_.push_back(_nh.advertise<sensor_msgs::MagneticField>(frames[i] + "/mag/data_raw", 2));
-  }
+	this->pub_ = _nh.advertise<thu_data_glove::ImuArray>("/imu/data_raw", 2);
 
-  // soon deprecated
-	this->_glove_data_pub = _nh.advertise<thu_data_glove::GloveData>("glove_joint", 2);
+  this->bias_values_.resize(18);
+  this->prev_values_.resize(18);
 	ros::spin();
 }
 
@@ -55,13 +54,46 @@ void rosBridge::sensorData_received(SensorData sd)
     return;
   }
   // TODO rosparam
-  if (sd.gloveID != OLD_RH)
+  if (sd.gloveID != NEW_LH)
     return;
 
   ros::Time time = ros::Time::now(); //todo
 
-  for (int i=0; i<18; i++) {
+  thu_data_glove::ImuArray imus;
+  imus.header.stamp = ros::Time::now();
 
+  for (int i=0; i<18; i++) {
+    if (i == 15) { // broken wrist imu, use palm values
+      // Imu
+      sensor_msgs::Imu imu_msg;
+      imu_msg.header.frame_id = frames[i];
+      imu_msg.header.stamp = time;
+
+      imu_msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(sd.sensor_data[17].roll *3.1415/180, -sd.sensor_data[17].pitch *3.1415/180, -sd.sensor_data[17].yaw *3.1415/180);
+
+      imu_msg.angular_velocity.x = sd.sensor_data[17].Wx;
+      imu_msg.angular_velocity.y = sd.sensor_data[17].Wy;
+      imu_msg.angular_velocity.z = sd.sensor_data[17].Wz;
+
+      imu_msg.linear_acceleration.x = sd.sensor_data[17].Ax;
+      imu_msg.linear_acceleration.y = sd.sensor_data[17].Ay;
+      imu_msg.linear_acceleration.z = sd.sensor_data[17].Az;
+
+      imus.imu.push_back(imu_msg);
+
+      // Magnetic field
+      sensor_msgs::MagneticField mag_msg;
+      mag_msg.header.frame_id = frames[i];
+      mag_msg.header.stamp = time;
+
+      mag_msg.magnetic_field.x = sd.sensor_data[17].Mx;
+      mag_msg.magnetic_field.y = sd.sensor_data[17].My;
+      mag_msg.magnetic_field.z = sd.sensor_data[17].Mz;
+
+      imus.magnetic_field.push_back(mag_msg);
+      continue;
+    }
+    // Imu
     sensor_msgs::Imu imu_msg;
     imu_msg.header.frame_id = frames[i];
     imu_msg.header.stamp = time;
@@ -76,8 +108,9 @@ void rosBridge::sensorData_received(SensorData sd)
     imu_msg.linear_acceleration.y = sd.sensor_data[i].Ay;
     imu_msg.linear_acceleration.z = sd.sensor_data[i].Az;
 
-    this->imu_pub_[i].publish(imu_msg);
+    imus.imu.push_back(imu_msg);
 
+    // Magnetic field
     sensor_msgs::MagneticField mag_msg;
     mag_msg.header.frame_id = frames[i];
     mag_msg.header.stamp = time;
@@ -86,48 +119,13 @@ void rosBridge::sensorData_received(SensorData sd)
     mag_msg.magnetic_field.y = sd.sensor_data[i].My;
     mag_msg.magnetic_field.z = sd.sensor_data[i].Mz;
 
-    this->mag_pub_[i].publish(mag_msg);
+    imus.magnetic_field.push_back(mag_msg);
   }
+  bias_ = true;
+  this->pub_.publish(imus);
 }
 
 // soon deprecated
 void rosBridge::gloveData_received(GloveData gd)
 {
-	thu_data_glove::GloveData data;
-	data.gloveID = gd.gloveID;
-	data.arm0 = gd.arm.a0;
-	data.arm1_0 = gd.arm.a10;
-	data.arm1_1 = gd.arm.a11;
-
-	data.thumb0_0 = gd.thumb.t00;
-	data.thumb0_1 = gd.thumb.t01;
-	data.thumb1 = gd.thumb.t1;
-	data.thumb2 = gd.thumb.t2;
-
-	data.forefinger0_0 = gd.forefinger.f00;
-	data.forefinger0_1 = gd.forefinger.f01;
-	data.forefinger1 = gd.forefinger.f1;
-	data.forefinger2 = gd.forefinger.f2;
-
-	data.middlefinger0_0 = gd.middlefinger.m00;
-	data.middlefinger0_1 = gd.middlefinger.m01;
-	data.middlefinger1 = gd.middlefinger.m1;
-	data.middlefinger2 = gd.middlefinger.m2;
-
-	data.ringfinger0_0 = gd.ringfinger.r00;
-	data.ringfinger0_1 = gd.ringfinger.r01;
-	data.ringfinger1 = gd.ringfinger.r1;
-	data.ringfinger2 = gd.ringfinger.r2;
-
-	data.littlefinger0_0 = gd.littlefinger.l00;
-	data.littlefinger0_1 = gd.littlefinger.l01;
-	data.littlefinger1 = gd.littlefinger.l1;
-	data.littlefinger2 = gd.littlefinger.l2;
-
-	data.base.w = gd.base.w;
-	data.base.x = gd.base.x;
-	data.base.y = gd.base.y;
-	data.base.z = gd.base.z;
-
-	this->_glove_data_pub.publish(data);
 }

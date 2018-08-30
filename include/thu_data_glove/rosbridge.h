@@ -4,16 +4,19 @@
 #include <QtCore/QThread>
 #include <thu_data_glove/datastruct.h>
 #include <ros/ros.h>
+#include <tf/tf.h>
 
 class rosBridge : public QThread
 {
 	Q_OBJECT
 
 private:
-  std::vector<ros::Publisher> imu_pub_;
-  std::vector<ros::Publisher> mag_pub_;
+  ros::Publisher pub_;
   //soon deprecated
 	ros::Publisher _glove_data_pub;
+  bool bias_ = false;
+  std::vector<tf::Quaternion> bias_values_;
+  std::vector<tf::Quaternion> prev_values_;
 
 public:
 	explicit rosBridge(int argc, char **argv, QObject *parent = nullptr);

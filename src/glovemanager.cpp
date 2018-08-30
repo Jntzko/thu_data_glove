@@ -3,6 +3,10 @@
 #include <QtCore/QThread>
 #include <QtNetwork/QNetworkInterface>
 
+#define NEW_LH 1192974848
+#define NEW_RH 1193564786
+#define OLD_LH 1192778367
+#define OLD_RH 1192974877
 
 void GloveManager::response_dataflow(const QByteArray &dataload, const QHostAddress &addr)
 {
@@ -68,6 +72,22 @@ void GloveManager::response_connect(const QByteArray &dataload, const QHostAddre
 			qDebug() << QString("Connected with shorter glove_id # %1").arg(this->dev_ip_id[i].second, 8, 16, QChar('0'));
 			this->connected = true;
 		}
+    switch (this->dev_ip_id[i].second) {
+      case NEW_RH:
+		    qDebug() << "Connected with new right glove";
+        break;
+      case NEW_LH:
+		    qDebug() << "Connected with new left glove";
+        break;
+      case OLD_RH:
+		    qDebug() << "Connected with old right glove";
+        break;
+      case OLD_LH:
+		    qDebug() << "Connected with old left glove";
+        break;
+      default:
+        break;
+    }
 	}
 }
 

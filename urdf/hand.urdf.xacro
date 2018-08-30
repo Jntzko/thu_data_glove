@@ -55,27 +55,47 @@
       <limit upper="1.57079" lower="0" effort="1000.0" velocity="0.5"/>
     </joint>
 
+    <!-- Imu -->
+    <xacro:imu prefix="${prefix}_" name="${name}" origin="${length/2} -0.01 0" rpy="1.57079 0 0"/>
   </xacro:macro>
 
 
+    <!-- Imu -->
+  <xacro:macro name="imu" params="prefix name origin rpy">
+    <link name="${prefix}${name}_imu_link"/>
+
+    <joint name="${prefix}${name}_imu_link_joint" type="fixed">
+      <parent link="${prefix}${name}"/>
+      <child link="${prefix}${name}_imu_link" />
+      <origin xyz="${origin}" rpy="${rpy}"/>
+    </joint>
+
+    <link name="${prefix}${name}_imu"/>
+
+    <joint name="${prefix}${name}_imu_joint" type="floating">
+      <parent link="${prefix}${name}_imu_link"/>
+      <child link="${prefix}${name}_imu" />
+    </joint>
+  </xacro:macro>
 
   <!-- World -->
   <link name="world"/>
 
   <!-- Wrist -->
   <link name="wrist"/>
+  <xacro:imu prefix="" name="wrist" origin="0 0 0.0125" rpy="0 0 0"/>
 
-<!--
   <joint name="world_wrist" type="floating">
     <parent link="world"/>
     <child link="wrist" />
   </joint>
--->
+<!--
   <joint name="world_wrist" type="fixed">
     <parent link="world"/>
     <child link="wrist" />
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
   </joint>
+-->
 
   <!-- Palm --> 
   <link name="palm">
@@ -95,6 +115,8 @@
     <child link="palm"/>
     <origin xyz="0.055 0 0" rpy="0 0 0"/>
   </joint>
+
+  <xacro:imu prefix="" name="palm" origin="0 0 0.0125" rpy="0 0 0"/>
 
   <!-- first finger -->
   <xacro:knuckle prefix="ff"
@@ -193,7 +215,7 @@
   <xacro:phalanx prefix="th" name="distal"
       parent="th_middle"
       joint="j1"
-      length="0.05"
-      origin="0.03 0 0" rpy="0 0 0"/>
+      length="0.03"
+      origin="0.05 0 0" rpy="0 0 0"/>
 
 </robot>
