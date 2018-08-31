@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find thu_data_glove)/urdf/hand.urdf.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find thu_data_glove)/urdf/hand.urdf.xacro hand:='rh'" />
 
   <node pkg="thu_data_glove" type="thu_data_glove" name="thu_data_glove" output="screen" />
 
